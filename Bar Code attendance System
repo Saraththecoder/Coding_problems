@@ -1,0 +1,205 @@
+import openpyxl
+from datetime import datetime
+import logging
+import winsound
+
+ATTENDANCE_FILE_PATH = 'attendance.xlsx'
+DATABASE_FILE_PATH = 'hall_tickets.xlsx'
+
+logging.basicConfig(filename='attendance_system.log', level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
+
+def load_attendance_excel():
+    try:
+        workbook = openpyxl.load_workbook(ATTENDANCE_FILE_PATH)
+        sheet = workbook.active
+        logging.info("Attendance Excel file loaded successfully.")
+    except FileNotFoundError:
+        logging.info("Attendance Excel file not found, creating a new one.")
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.append(['Serial No', 'Hall Ticket No', 'Branch', 'Check-in Date', 'Check-in Time', 'Name', 'Year'])
+        workbook.save(ATTENDANCE_FILE_PATH)
+    return workbook, sheet
+
+def load_hall_ticket_database():
+    try:
+        workbook = openpyxl.load_workbook(DATABASE_FILE_PATH)
+        sheet = workbook.active
+        logging.info("Hall ticket database loaded successfully.")
+    except FileNotFoundError:
+        logging.error("Hall ticket database file not found.")
+        return {}
+
+    valid_tickets = {}
+    print("Reading hall ticket database...")
+    for row in sheet.iter_rows(min_row=2, values_only=True):
+        if row and len(row) >= 2 and row[0] and row[1]:
+            hall_ticket, name = row[0].strip(), row[1].strip()
+            valid_tickets[hall_ticket] =  {"name": name}
+        else:
+            logging.warning(f"Skipping invalid or incomplete row: {row}")
+
+    logging.info(f"Valid tickets loaded: {valid_tickets}")
+
+    return valid_tickets
+
+def branch_name(hall_ticket):
+    branch=str(hall_ticket[4:8])
+    if(branch=="1A30") or (branch=="5A30") :
+        return "AIDS"
+    elif(branch=="1A33") or (branch=="5A33") :
+        return "AIML"
+    elif(branch=="1A04") or (branch=="5A04") :
+        return "ECE"
+    elif (branch == "1A32") or (branch == "5A32"):
+        return "CSE-DS"
+    elif (branch == "1A36") or (branch == "5A36"):
+        return "CIC"
+    elif (branch == "1A02") or (branch == "5A02"):
+        return "EEE"
+    elif (branch == "1A03") or (branch == "5A03"):
+        return "ME"
+    elif (branch =="1A01") or (branch =="5A01"):
+        return "CE"
+    elif (branch == "1D82"):
+        return "EEE"
+    elif (branch == "1D20"):
+        return "CE"
+    elif (branch =="1D90"):
+        return "ME"
+    elif (branch == "1D58"):
+        return "CSE"
+    elif (branch == "1F00"):
+        return "MCA"
+    elif (branch == "1E00"):
+        return "MBA"
+#IT is incomplete
+def calculate_year(hall_ticket):
+    current_year = datetime.now().year
+    join_year = int(hall_ticket[:2]) + 2000
+    branch = str(hall_ticket[4:8])
+
+    year_diff = current_year - join_year
+
+    diploma_branches = ["5A30", "5A01", "5A33", "5A04", "5A03", "5A32", "5A36", "5A02"]
+
+    btech_branches = ["1A30", "1A33", "1A04", "1A32", "1A36", "1A02", "1A03", "1A01"]
+
+    mtech_branches = ["1D82", "1D20", "1D90", "1D58"]
+
+    mca_branch = "1F00"
+    mba_branch = "1E00"
+
+    if branch in diploma_branches:
+        if year_diff == 0:
+            return "2nd year diploma"
+        elif year_diff == 1:
+            return "3rd year diploma"
+        elif year_diff == 2:
+            return "4th year diploma"
+        else:
+            winsound.Beep(1000, 1500)
+            return "Diploma Passed Out Student"
+
+    elif branch in btech_branches:
+        if year_diff == 0:
+            return "1st year B.Tech"
+        elif year_diff == 1:
+            return "2nd year B.Tech"
+        elif year_diff == 2:
+            return "3rd year B.Tech"
+        elif year_diff == 3:
+            return "4th year B.Tech"
+        else:
+            winsound.Beep(1000, 1500)
+            return "B.Tech Passed Out Student"
+
+    elif branch in mtech_branches:
+        if year_diff == 0:
+            return "1st year M.Tech"
+        elif year_diff == 1:
+            return "2nd year M.Tech"
+        else:
+            winsound.Beep(1000, 1500)
+            return "M.Tech Passed Out Student"
+
+    elif branch == mca_branch:
+        if year_diff == 0:
+            return "1st year MCA"
+        elif year_diff == 1:
+            return "2nd year MCA"
+        else:
+            winsound.Beep(1000, 1500)
+            return "MCA Passed Out Student"
+
+    elif branch == mba_branch:
+        if year_diff == 0:
+            return "1st year MBA"
+        elif year_diff == 1:
+            return "2nd year MBA"
+        else:
+            winsound.Beep(1000, 1500)
+            return "MBA Passed Out Student"
+
+    else:
+        winsound.Beep(1000, 1500)
+        return "Unknown Year or Invalid Branch"
+def get_next_serial_number(sheet):
+
+    if sheet.max_row == 1:
+        return 1
+    else:
+        return sheet.max_row
+
+
+def mark_attendance(hall_ticket):
+    valid_tickets = load_hall_ticket_database()
+
+    hall_ticket = hall_ticket.strip()
+    if hall_ticket not in valid_tickets:
+        logging.warning(f"Invalid Hall Ticket No: {hall_ticket}")
+        return "Invalid Barcode"
+
+    name = valid_tickets[hall_ticket]["name"]
+
+    year = calculate_year(hall_ticket)
+
+    if "Passed Out" in year:
+        logging.warning(f"Passed Out Student detected: {hall_ticket}")
+        return "Invalid Student"
+
+    workbook, sheet = load_attendance_excel()
+
+    current_datetime = datetime.now()
+    check_in_date = current_datetime.strftime('%Y-%m-%d')
+    check_in_time = current_datetime.strftime('%H:%M:%S')
+
+    branch = branch_name(hall_ticket)
+    serial_no = get_next_serial_number(sheet)
+
+    sheet.append([serial_no, hall_ticket, branch, check_in_date, check_in_time, name, year])
+    workbook.save(ATTENDANCE_FILE_PATH)
+
+    result_message = (
+        f"Serial No: {serial_no}, Hall Ticket No: {hall_ticket}, Branch: {branch}, "
+        f"Check-in Date: {check_in_date}, Check-in Time: {check_in_time}, Name: {name}, Year: {year}"
+    )
+    logging.info(f"Attendance marked: {result_message}")
+
+    return result_message
+
+def listen_for_barcode():
+    print("Waiting for barcode scan...")
+    while True:
+     hall_ticket = input("Scan a barcode (or type 'exit' to quit): ").strip()
+     result = mark_attendance(hall_ticket)
+     print(result)
+
+     logging.info(result)
+     if hall_ticket.lower() =='exit':
+        break
+
+if __name__ == "__main__":
+    listen_for_barcode()
