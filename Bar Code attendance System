@@ -2,6 +2,8 @@ import openpyxl
 from datetime import datetime
 import logging
 import winsound
+import tkinter as tk
+from tkinter import messagebox
 
 ATTENDANCE_FILE_PATH = 'attendance.xlsx'
 DATABASE_FILE_PATH = 'hall_tickets.xlsx'
@@ -23,6 +25,7 @@ def load_attendance_excel():
         workbook.save(ATTENDANCE_FILE_PATH)
     return workbook, sheet
 
+
 def load_hall_ticket_database():
     try:
         workbook = openpyxl.load_workbook(DATABASE_FILE_PATH)
@@ -33,11 +36,10 @@ def load_hall_ticket_database():
         return {}
 
     valid_tickets = {}
-    print("Reading hall ticket database...")
     for row in sheet.iter_rows(min_row=2, values_only=True):
         if row and len(row) >= 2 and row[0] and row[1]:
             hall_ticket, name = row[0].strip(), row[1].strip()
-            valid_tickets[hall_ticket] =  {"name": name}
+            valid_tickets[hall_ticket] = {"name": name}
         else:
             logging.warning(f"Skipping invalid or incomplete row: {row}")
 
@@ -113,7 +115,7 @@ def calculate_year(hall_ticket):
         elif year_diff == 3:
             return "4th year B.Tech"
         else:
-            winsound.Beep(1000, 1500)
+            winsound.Beep(1200, 1500)
             return "B.Tech Passed Out Student"
 
     elif branch in mtech_branches:
@@ -160,7 +162,8 @@ def mark_attendance(hall_ticket):
     hall_ticket = hall_ticket.strip()
     if hall_ticket not in valid_tickets:
         logging.warning(f"Invalid Hall Ticket No: {hall_ticket}")
-        return "Invalid Barcode"
+        return  winsound.Beep(1200, 2000)
+    "Invalid Barcode"
 
     name = valid_tickets[hall_ticket]["name"]
 
@@ -190,16 +193,156 @@ def mark_attendance(hall_ticket):
 
     return result_message
 
-def listen_for_barcode():
-    print("Waiting for barcode scan...")
-    while True:
-     hall_ticket = input("Scan a barcode (or type 'exit' to quit): ").strip()
-     result = mark_attendance(hall_ticket)
-     print(result)
 
-     logging.info(result)
-     if hall_ticket.lower() =='exit':
-        break
+def filter_attendance_by_month(month, year):
+    try:
+        workbook = openpyxl.load_workbook(ATTENDANCE_FILE_PATH)
+        sheet = workbook.active
+    except FileNotFoundError:
+        logging.error("Attendance Excel file not found.")
+        return "Attendance file not found."
+
+    filtered_data = []
+    unique_visitors = set()
+
+    for row in sheet.iter_rows(min_row=2, values_only=True):
+        if row:
+            check_in_date = row[3]
+            if check_in_date:
+                try:
+                    check_in_date_obj = datetime.strptime(check_in_date, '%Y-%m-%d')
+                    if check_in_date_obj.month == month and check_in_date_obj.year == year:
+                        filtered_data.append(row)
+                        unique_visitors.add(row[1])
+                except ValueError:
+                    logging.error(f"Invalid date format in row: {row}")
+                    continue
+
+    if not filtered_data:
+        return f"No data found for {month}/{year}"
+
+    filtered_workbook = openpyxl.Workbook()
+    filtered_sheet = filtered_workbook.active
+    filtered_sheet.append(['Serial No', 'Hall Ticket No', 'Branch', 'Check-in Date', 'Check-in Time', 'Name', 'Year'])
+
+    for row in filtered_data:
+        filtered_sheet.append(row)
+
+    filtered_file_name = f'attendance_{month}_{year}.xlsx'
+    filtered_workbook.save(filtered_file_name)
+    logging.info(f"Filtered attendance data saved to {filtered_file_name}")
+
+    visitor_count = len(unique_visitors)
+    logging.info(f"Number of unique visitors for {month}/{year}: {visitor_count}")
+
+    return f"Filtered attendance data saved to {filtered_file_name}. Download the file.\nNumber of unique visitors for {month}/{year}: {visitor_count}"
+
+
+def count_visitors(month, year):
+    try:
+        workbook = openpyxl.load_workbook(ATTENDANCE_FILE_PATH)
+        sheet = workbook.active
+    except FileNotFoundError:
+        logging.error("Attendance Excel file not found.")
+        return "Attendance file not found."
+
+    total_visitors = 0
+
+    for row in sheet.iter_rows(min_row=2, values_only=True):
+        if row:
+            check_in_date = row[3]
+            if check_in_date:
+                try:
+                    check_in_date_obj = datetime.strptime(check_in_date, '%Y-%m-%d')
+                    if check_in_date_obj.month == month and check_in_date_obj.year == year:
+                        total_visitors += 1
+                except ValueError:
+                    logging.error(f"Invalid date format in row: {row}")
+                    continue
+
+    logging.info(f"Total visitors for {month}/{year}: {total_visitors}")
+
+    return f"Total visitors for {month}/{year}: {total_visitors}"
+
+
+def scan_barcode():
+    barcode = input_barcode.get()
+    result = mark_attendance(barcode)
+    messagebox.showinfo("Attendance", result)
+
+
+def get_report():
+    try:
+        month = int(month_entry.get())
+        year = int(year_entry.get())
+        result = filter_attendance_by_month(month, year)
+        messagebox.showinfo("Monthly Report", result)
+    except ValueError:
+        messagebox.showerror("Input Error", "Please enter valid month (1-12) and year (YYYY).")
+
+
+def show_visitor_count():
+    try:
+        month = int(month_entry.get())
+        year = int(year_entry.get())
+        result = count_visitors(month, year)
+        messagebox.showinfo("Visitor Count", result)
+    except ValueError:
+        messagebox.showerror("Input Error", "Please enter valid month (1-12) and year (YYYY).")
+
+def launch_tkinter_window():
+    app = tk.Tk()
+    app.title("Attendance System")
+    app.geometry("400x300")
+
+    large_font = ("Arial", 16)
+    medium_font = ("Arial", 14)
+
+    input_label = tk.Label(app, text="Scan Barcode:", font=large_font)
+    input_label.grid(row=0, column=0, pady=10, padx=10, sticky="w")
+
+    global input_barcode
+    input_barcode = tk.Entry(app, font=medium_font, width=30)
+    input_barcode.grid(row=1, column=0, pady=10, padx=10)
+
+    scan_button = tk.Button(app, text="Mark Attendance", font=medium_font, command=scan_barcode)
+    scan_button.grid(row=2, column=0, pady=10, padx=10)
+
+    month_label = tk.Label(app, text="Enter Month (1-12):", font=large_font)
+    month_label.grid(row=3, column=0, pady=10, padx=10, sticky="w")
+
+    global month_entry
+    month_entry = tk.Entry(app, font=medium_font, width=10)
+    month_entry.grid(row=4, column=0, pady=10, padx=10)
+
+    year_label = tk.Label(app, text="Enter Year (YYYY):", font=large_font)
+    year_label.grid(row=5, column=0, pady=10, padx=10, sticky="w")
+
+    global year_entry
+    year_entry = tk.Entry(app, font=medium_font, width=10)
+    year_entry.grid(row=6, column=0, pady=10, padx=10)
+
+    report_button = tk.Button(app, text="Get Monthly Report", font=medium_font, command=get_report)
+    report_button.grid(row=7, column=0, pady=10, padx=10)
+
+    visitor_button = tk.Button(app, text="Show Visitor Count", font=medium_font, command=show_visitor_count)
+    visitor_button.grid(row=8, column=0, pady=10, padx=10)
+
+    app.mainloop()
+
+def listen_for_input():
+    while True:
+        user_input = input("Enter a barcode or '4' for options (or type 'exit' to quit): ").strip()
+
+        if user_input.lower() == 'exit':
+            break
+        elif user_input == '4':
+            launch_tkinter_window()
+        else:
+            result = mark_attendance(user_input)
+            print(result)
+            logging.info(result)
+
 
 if __name__ == "__main__":
-    listen_for_barcode()
+    listen_for_input()
