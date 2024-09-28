@@ -1,0 +1,56 @@
+import os
+from flask import Flask, render_template, request, redirect, url_for, send_file
+import cv2
+from werkzeug.utils import secure_filename
+
+app = Flask(__name__)
+
+UPLOAD_FOLDER = 'static/'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def convert_to_sketch(image_path, output_path):
+    # Read the image
+    image = cv2.imread(image_path)
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    inverted_image = 255 - gray_image
+    blurred = cv2.GaussianBlur(inverted_image, (21, 21), 0)
+    inverted_blurred = 255 - blurred
+    sketch = cv2.divide(gray_image, inverted_blurred, scale=256.0)
+    cv2.imwrite(output_path, sketch)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+  
+    if 'file' not in request.files:
+        return redirect(request.url)
+    file = request.files['file']
+
+   
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+
+        sketch_path = os.path.join(app.config['UPLOAD_FOLDER'], 'sketch_image.png')
+        convert_to_sketch(file_path, sketch_path)
+
+        return render_template('index.html', sketch_image='sketch_image.png')
+
+    return redirect('/')
+
+@app.route('/download')
+def download_file():
+    path = os.path.join(app.config['UPLOAD_FOLDER'], 'sketch_image.png')
+    return send_file(path, as_attachment=True)
+
+if __name__ == '__main__':
+    app.run(debug=True)
