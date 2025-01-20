@@ -1,0 +1,8 @@
+r=5
+for i in range(5):
+    for j in range(5):
+        if i==0 or i+j==r-1 or i==r-1:
+          print('*',end=" ")
+        else:
+            print(" ",end=" ")
+    print()
