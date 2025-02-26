@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Om Mythological Music Player</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            position: relative;
+            color: white;
+            overflow: hidden;
+            background: #000;
+        }
+
+        /* Om Background */
+        .om-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: linear-gradient(135deg, #391865, #21104a);
+            overflow: hidden;
+        }
+        
+        .om-symbol {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            opacity: 0.1;
+            transform: rotate(0deg);
+            transition: transform 20s linear, opacity 2s ease;
+            filter: drop-shadow(0 0 10px rgba(157, 80, 187, 0.5));
+            animation: float 15s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+            100% { transform: translateY(0) rotate(360deg); }
+        }
+        
+        /* Dark overlay for better contrast */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Particle container */
+        #particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .home-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+            font-size: 20px;
+            text-align: center;
+            color: white;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        .home-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .player {
+            width: 380px;
+            padding: 30px;
+            border-radius: 24px;
+            background: rgba(0, 0, 0, 0.5);
+            text-align: center;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 
+                        0 0 30px rgba(157, 80, 187, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            z-index: 5;
+        }
+        
+        .player:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), 
+                        0 0 40px rgba(157, 80, 187, 0.4);
+        }
+
+        .mood-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .cover-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 25px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4),
+                        0 0 15px rgba(157, 80, 187, 0.6);
+            animation: pulse 2s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(157, 80, 187, 0.6); }
+            50% { transform: scale(1.03); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 20px rgba(157, 80, 187, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(157, 80, 187, 0.6); }
+        }
+
+        .cover {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .playing .cover {
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .song-title {
+            font-size: 26px;
+            margin: 5px 0 20px;
+            font-weight: 600;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .time-container {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .progress {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #9D50BB, #6E48AA);
+            position: relative;
+            border-radius: 10px;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px rgba(157, 80, 187, 0.5);
+        }
+
+        .progress-dot {
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            right: -6px;
+            transform: translateY(-50%);
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+            display: none;
+        }
+        
+        .progress:hover .progress-dot {
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            outline: none;
+            font-size: 18px;
+            color: white;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+        
+        #play {
+            width: 60px;
+            height: 60px;
+            font-size: 22px;
+            background: linear-gradient(135deg, #9D50BB, #6E48AA);
+            border: none;
+        }
+        
+        #play:hover {
+            box-shadow: 0 0 20px rgba(157, 80, 187, 0.7);
+        }
+        
+        .volume-container {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            margin-top: 25px;
+            padding: 0 10px;
+        }
+        
+        .volume-icon {
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        
+        .volume-slider {
+            flex: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .volume-progress {
+            width: 70%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Om Background -->
+    <div class="om-background" id="om-background">
+        <!-- Om symbols will be added via JavaScript -->
+    </div>
+    
+    <!-- Particles Container -->
+    <div id="particles-container"></div>
+    
+    <!-- Dark overlay -->
+    <div class="overlay"></div>
+
+    <button class="home-btn" onclick="window.location.href='home1.html'"><i class="fas fa-home"></i></button>
+
+    <div class="player">
+        <h2 class="mood-title">Mood - Demotivated</h2>
+        <div class="cover-container" id="cover-container">
+            <img src="cover1.jpg" id="cover" class="cover">
+        </div>
+        <div class="song-title" id="song-title">Divine Chant</div>
+        <audio id="audio"></audio>
+        
+        <div class="time-container">
+            <span id="current-time">0:00</span>
+            <span id="duration">0:00</span>
+        </div>
+        
+        <div class="progress" id="progress-container">
+            <div class="progress-bar" id="progress-bar">
+                <div class="progress-dot"></div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" id="prev"><i class="fas fa-backward"></i></button>
+            <button class="btn" id="play"><i class="fas fa-play"></i></button>
+            <button class="btn" id="next"><i class="fas fa-forward"></i></button>
+            <button class="btn" id="download"><i class="fas fa-download"></i></button>
+        </div>
+        
+        <div class="volume-container">
+            <div class="volume-icon"><i class="fas fa-volume-up"></i></div>
+            <div class="volume-slider" id="volume-slider">
+                <div class="volume-progress" id="volume-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const audio = document.getElementById('audio');
+        const playBtn = document.getElementById('play');
+        const prevBtn = document.getElementById('prev');
+        const nextBtn = document.getElementById('next');
+        const downloadBtn = document.getElementById('download');
+        const progressBar = document.getElementById('progress-bar');
+        const progressContainer = document.getElementById('progress-container');
+        const cover = document.getElementById('cover');
+        const coverContainer = document.getElementById('cover-container');
+        const songTitle = document.getElementById('song-title');
+        const currentTimeEl = document.getElementById('current-time');
+        const durationEl = document.getElementById('duration');
+        const volumeSlider = document.getElementById('volume-slider');
+        const volumeProgress = document.getElementById('volume-progress');
+        const omBackground = document.getElementById('om-background');
+    
+        let isPlaying = false;
+    
+        const songs = [
+            { src: "song1.mp3", cover: "d1.webp", title: "Demotivate 1", color: "#ff5733" },
+            { src: "divine_chant2.mp3", cover: "d2.webp", title: "Demotivate 2", color: "#ffbd33" },
+            { src: "divine_chant3.mp3", cover: "d3.webp", title: "Demotivate 3", color: "#33ff57" },
+            { src: "divine_chant4.mp3", cover: "d4.webp", title: "Demotivate 4", color: "#3357ff" },
+            { src: "divine_chant5.mp3", cover: "d5.webp", title: "Demotivate 5", color: "#a033ff" }
+        ];
+        
+        let songIndex = 0;
+        
+        // Create Om symbols for the background
+        function createOmBackground() {
+            // Clear previous oms
+            omBackground.innerHTML = '';
+            
+            // Om symbol SVG
+            const omSvg = `
+                <svg class="om-symbol" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="white" d="M50,5 C25,5 5,25 5,50 C5,75 25,95 50,95 C75,95 95,75 95,50 C95,25 75,5 50,5 Z M50,15 C70,15 85,30 85,50 C85,70 70,85 50,85 C30,85 15,70 15,50 C15,30 30,15 50,15 Z M60,35 C55,30 45,30 40,35 C35,40 35,50 40,55 L50,65 C55,70 65,70 70,65 C75,60 75,50 70,45 L60,35 Z M40,35 C45,30 55,30 60,35 L70,45 C75,50 75,60 70,65 C65,70 55,70 50,65 L40,55 C35,50 35,40 40,35 Z M50,40 C45,40 40,45 40,50 C40,55 45,60 50,60 C55,60 60,55 60,50 C60,45 55,40 50,40 Z"/>
+                </svg>
+            `;
+            
+            // Create 20 Om symbols
+            for (let i = 0; i < 20; i++) {
+                omBackground.innerHTML += omSvg;
+            }
+            
+            // Position Om symbols randomly
+            const omSymbols = document.querySelectorAll('.om-symbol');
+            omSymbols.forEach(symbol => {
+                const size = Math.random() * 100 + 50; // Random size between 50px and 150px
+                const x = Math.random() * 100; // Random horizontal position
+                const y = Math.random() * 100; // Random vertical position
+                const opacity = Math.random() * 0.2 + 0.05; // Random opacity between 0.05 and 0.25
+                const rotationSpeed = Math.random() * 20 + 10; // Random rotation speed
+                const floatSpeed = Math.random() * 15 + 5; // Random float speed
+                const delay = Math.random() * 10; // Random animation delay
+                
+                symbol.style.width = `${size}px`;
+                symbol.style.height = `${size}px`;
+                symbol.style.left = `${x}%`;
+                symbol.style.top = `${y}%`;
+                symbol.style.opacity = opacity;
+                symbol.style.animationDuration = `${floatSpeed}s`;
+                symbol.style.animationDelay = `${delay}s`;
+            });
+        }
+        
+        // Create Om background
+        createOmBackground();
+        
+        // Particles effect initialization
+        window.onload = function() {
+            Particles.init({
+                selector: '#particles-container',
+                maxParticles: 100,
+                sizeVariations: 3,
+                color: ['#ffffff', '#9D50BB', '#6E48AA'],
+                connectParticles: true,
+                responsive: [
+                    {
+                        breakpoint: 768,
+                        options: {
+                            maxParticles: 50
+                        }
+                    }
+                ]
+            });
+        };
+    
+        function loadSong(index) {
+            audio.src = songs[index].src;
+            cover.src = songs[index].cover;
+            songTitle.textContent = songs[index].title;
+            
+            // Update background gradient based on song color
+            omBackground.style.background = `linear-gradient(135deg, ${songs[index].color}, #21104a)`;
+            
+            audio.load();
+        }
+    
+        function playSong() {
+            coverContainer.classList.add('playing');
+            audio.play();
+            isPlaying = true;
+            playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        }
+    
+        function pauseSong() {
+            coverContainer.classList.remove('playing');
+            audio.pause();
+            isPlaying = false;
+            playBtn.innerHTML = '<i class="fas fa-play"></i>';
+        }
+    
+        function downloadSong() {
+            const link = document.createElement('a');
+            link.href = audio.src;
+            link.download = songs[songIndex].title + '.mp3';
+            link.click();
+        }
+        
+        // Format time to MM:SS
+        function formatTime(seconds) {
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return `${min}:${sec < 10 ? '0' + sec : sec}`;
+        }
+    
+        playBtn.addEventListener('click', () => {
+            isPlaying ? pauseSong() : playSong();
+        });
+    
+        prevBtn.addEventListener('click', () => {
+            songIndex = (songIndex - 1 + songs.length) % songs.length;
+            loadSong(songIndex);
+            if (isPlaying) {
+                playSong();
+            }
+        });
+    
+        nextBtn.addEventListener('click', () => {
+            songIndex = (songIndex + 1) % songs.length;
+            loadSong(songIndex);
+            if (isPlaying) {
+                playSong();
+            }
+        });
+    
+        downloadBtn.addEventListener('click', downloadSong);
+    
+        // Update progress bar
+        audio.addEventListener('timeupdate', () => {
+            const progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = `${progress}%`;
+            
+            // Update current time
+            currentTimeEl.textContent = formatTime(audio.currentTime);
+        });
+        
+        // Set duration when metadata is loaded
+        audio.addEventListener('loadedmetadata', () => {
+            durationEl.textContent = formatTime(audio.duration);
+        });
+    
+        // Click on progress bar
+        progressContainer.addEventListener('click', (event) => {
+            const width = progressContainer.clientWidth;
+            const clickX = event.offsetX;
+            const duration = audio.duration;
+            audio.currentTime = (clickX / width) * duration;
+        });
+        
+        // Play next song when current song ends
+        audio.addEventListener('ended', () => {
+            songIndex = (songIndex + 1) % songs.length;
+            loadSong(songIndex);
+            playSong();
+        });
+        
+        // Volume control
+        volumeSlider.addEventListener('click', (event) => {
+            const width = volumeSlider.clientWidth;
+            const clickX = event.offsetX;
+            const volume = clickX / width;
+            
+            // Set volume and update UI
+            audio.volume = volume;
+            volumeProgress.style.width = `${volume * 100}%`;
+        });
+    
+        // Set initial volume
+        audio.volume = 0.7;
+        
+        // Keyboard controls
+        document.addEventListener('keydown', (event) => {
+            switch(event.code) {
+                case 'Space':
+                    event.preventDefault();
+                    isPlaying ? pauseSong() : playSong();
+                    break;
+                case 'ArrowRight':
+                    songIndex = (songIndex + 1) % songs.length;
+                    loadSong(songIndex);
+                    if (isPlaying) playSong();
+                    break;
+                case 'ArrowLeft':
+                    songIndex = (songIndex - 1 + songs.length) % songs.length;
+                    loadSong(songIndex);
+                    if (isPlaying) playSong();
+                    break;
+                case 'ArrowUp':
+                    audio.volume = Math.min(1, audio.volume + 0.1);
+                    volumeProgress.style.width = `${audio.volume * 100}%`;
+                    break;
+                case 'ArrowDown':
+                    audio.volume = Math.max(0, audio.volume - 0.1);
+                    volumeProgress.style.width = `${audio.volume * 100}%`;
+                    break;
+            }
+        });
+        
+        // Add resize listener to recreate background
+        window.addEventListener('resize', createOmBackground);
+    
+        loadSong(songIndex);
+    </script>
+
+</body>
+</html>
