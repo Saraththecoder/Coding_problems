@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mythological Music Player</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            position: relative;
+            color: white;
+            overflow: hidden;
+            background: #000;
+        }
+
+        /* Mythological Background */
+        .mythological-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: linear-gradient(135deg, #3a1c71, #d76d77, #ffaf7b);
+            overflow: hidden;
+        }
+        
+        /* Stars/cosmic elements */
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            filter: blur(1px);
+            animation: twinkle 5s infinite ease-in-out;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+        
+        /* Mythological symbols */
+        .myth-symbol {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            opacity: 0.15;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6));
+            animation: float 15s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+            100% { transform: translateY(0) rotate(360deg); }
+        }
+        
+        /* Animated cloud/mist elements */
+        .mist {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            filter: blur(40px);
+            animation: drift 30s infinite linear;
+        }
+        
+        @keyframes drift {
+            0% { transform: translateX(-5%) translateY(0); }
+            25% { transform: translateX(0) translateY(5%); }
+            50% { transform: translateX(5%) translateY(0); }
+            75% { transform: translateX(0) translateY(-5%); }
+            100% { transform: translateX(-5%) translateY(0); }
+        }
+        
+        /* Dark overlay for better contrast */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Animated celestial border */
+        .celestial-border {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            background: 
+                radial-gradient(circle at top left, transparent 97%, rgba(255, 215, 0, 0.2) 100%),
+                radial-gradient(circle at bottom right, transparent 97%, rgba(255, 215, 0, 0.2) 100%);
+        }
+
+        .home-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+            font-size: 20px;
+            text-align: center;
+            color: white;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        .home-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .player {
+            width: 380px;
+            padding: 30px;
+            border-radius: 24px;
+            background: rgba(0, 0, 0, 0.5);
+            text-align: center;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 
+                        0 0 30px rgba(255, 215, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            z-index: 5;
+        }
+        
+        .player:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), 
+                        0 0 40px rgba(255, 215, 0, 0.4);
+        }
+
+        .mood-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            color: rgba(255, 215, 0, 0.8);
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .cover-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 25px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4),
+                        0 0 15px rgba(255, 215, 0, 0.6);
+            animation: pulse 2s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 215, 0, 0.6); }
+            50% { transform: scale(1.03); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 215, 0, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 215, 0, 0.6); }
+        }
+
+        .cover {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .playing .cover {
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .song-title {
+            font-size: 26px;
+            margin: 5px 0 20px;
+            font-weight: 600;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .time-container {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .progress {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #FFD700, #FF8C00);
+            position: relative;
+            border-radius: 10px;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .progress-dot {
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            right: -6px;
+            transform: translateY(-50%);
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+            display: none;
+        }
+        
+        .progress:hover .progress-dot {
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            outline: none;
+            font-size: 18px;
+            color: white;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 10px;
+        }
+
+        .btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+        
+        #play {
+            width: 60px;
+            height: 60px;
+            font-size: 22px;
+            background: linear-gradient(135deg, #FFD700, #FF8C00);
+            border: none;
+        }
+        
+        #play:hover {
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+        }
+        
+        .volume-container {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            margin-top: 25px;
+            padding: 0 10px;
+        }
+        
+        .volume-icon {
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        
+        .volume-slider {
+            flex: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .volume-progress {
+            width: 70%;
+            height: 100%;
+            background: rgba(255, 215, 0, 0.5);
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mythological Background -->
+    <div class="mythological-background" id="mythological-background">
+        <!-- Elements will be added via JavaScript -->
+    </div>
+    
+    <!-- Celestial border -->
+    <div class="celestial-border"></div>
+    
+    <!-- Dark overlay -->
+    <div class="overlay"></div>
+
+    <button class="home-btn" onclick="window.location.href='home1.html'"><i class="fas fa-home"></i></button>
+
+    <div class="player">
+        <h2 class="mood-title">The powerful mantra</h2>
+        <div class="cover-container" id="cover-container">
+            <img src="photos/om.jpg" id="cover" class="cover" alt="Song Cover">
+        </div>
+        <div class="song-title" id="song-title">ॐ-OM</div>
+        <audio id="audio"></audio>
+        
+        <div class="time-container">
+            <span id="current-time">0:00</span>
+            <span id="duration">0:00</span>
+        </div>
+        
+        <div class="progress" id="progress-container">
+            <div class="progress-bar" id="progress-bar">
+                <div class="progress-dot"></div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" id="next"><i class="fa-solid fa-arrow-left"></i></i></button>
+            <button class="btn" id="play"><i class="fas fa-play"></i></button>
+            <button class="btn" id="next2"><i class="fa-solid fa-arrow-right"></i> </button>
+        </div>
+        
+        <div class="volume-container">
+            <div class="volume-icon"><i class="fas fa-volume-up"></i></div>
+            <div class="volume-slider" id="volume-slider">
+                <div class="volume-progress" id="volume-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const audio = document.getElementById('audio');
+        const playBtn = document.getElementById('play');
+        const nextBtn = document.getElementById('next');
+        const nextBtn2 = document.getElementById('next2');
+        const progressBar = document.getElementById('progress-bar');
+        const progressContainer = document.getElementById('progress-container');
+        const cover = document.getElementById('cover');
+        const coverContainer = document.getElementById('cover-container');
+        const songTitle = document.getElementById('song-title');
+        const currentTimeEl = document.getElementById('current-time');
+        const durationEl = document.getElementById('duration');
+        const volumeSlider = document.getElementById('volume-slider');
+        const volumeProgress = document.getElementById('volume-progress');
+        const mythologicalBackground = document.getElementById('mythological-background');
+    
+        let isPlaying = false;
+    
+        // Single song configuration
+        const song = {
+            src: "divine_chant.mp3",
+            title: "ॐ-OM",
+            color: "#FFD700"
+        };
+        
+        // Next page configuration - Change this to your next page URL
+        const nextPageUrl = "next_meditation.html";
+        
+        // Mythological symbols SVGs
+        const mythSymbols = [
+            // Ankh (Egyptian symbol of life)
+            `<svg class="myth-symbol" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <path fill="white" d="M50 0 C40 0 30 10 30 25 C30 40 40 50 50 60 L50 100 L60 100 L60 60 C70 50 80 40 80 25 C80 10 70 0 60 0 L50 0 Z M50 10 C55 10 60 15 60 25 C60 35 55 40 50 45 C45 40 40 35 40 25 C40 15 45 10 50 10 Z"/>
+            </svg>`,
+            
+            // Trident (Symbol of Poseidon/Neptune)
+            `<svg class="myth-symbol" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <path fill="white" d="M50 0 L50 70 L30 70 L50 100 L70 70 L50 70 Z M30 0 L30 30 L20 30 L35 50 L50 30 L40 30 L40 0 Z M70 0 L70 30 L60 30 L75 50 L90 30 L80 30 L80 0 Z"/>
+            </svg>`,
+            
+            // Thor's Hammer (Mjolnir)
+            `<svg class="myth-symbol" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <path fill="white" d="M30 10 L70 10 L70 30 L90 30 L90 60 L70 60 L70 90 L60 90 L60 40 L40 40 L40 90 L30 90 L30 60 L10 60 L10 30 L30 30 Z"/>
+            </svg>`,
+            
+            // Om symbol
+            `<svg class="myth-symbol" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <path fill="white" d="M50,5 C25,5 5,25 5,50 C5,75 25,95 50,95 C75,95 95,75 95,50 C95,25 75,5 50,5 Z M50,15 C70,15 85,30 85,50 C85,70 70,85 50,85 C30,85 15,70 15,50 C15,30 30,15 50,15 Z M60,35 C55,30 45,30 40,35 C35,40 35,50 40,55 L50,65 C55,70 65,70 70,65 C75,60 75,50 70,45 L60,35 Z M40,35 C45,30 55,30 60,35 L70,45 C75,50 75,60 70,65 C65,70 55,70 50,65 L40,55 C35,50 35,40 40,35 Z M50,40 C45,40 40,45 40,50 C40,55 45,60 50,60 C55,60 60,55 60,50 C60,45 55,40 50,40 Z"/>
+            </svg>`,
+            
+            // Yin Yang
+            `<svg class="myth-symbol" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <path fill="white" d="M50 5 A45 45 0 1 1 50 95 A45 45 0 1 1 50 5 Z M50 5 A45 45 0 0 0 50 95 A22.5 22.5 0 0 1 50 50 A22.5 22.5 0 0 0 50 5 Z M50 32.5 A5 5 0 1 0 50 42.5 A5 5 0 1 0 50 32.5 Z M50 57.5 A5 5 0 1 1 50 67.5 A5 5 0 1 1 50 57.5 Z"/>
+            </svg>`,
+            
+            // Triquetra (Celtic knot)
+            `<svg class="myth-symbol" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <path fill="white" d="M50,5 C25,5 5,25 5,50 C5,75 25,95 50,95 C75,95 95,75 95,50 C95,25 75,5 50,5 Z M50,20 C45,35 55,45 70,40 C65,55 75,65 90,60 C85,75 70,80 55,70 C60,85 50,95 35,90 C40,75 30,65 15,70 C20,55 35,50 50,60 C45,45 55,35 70,30 C65,15 50,10 35,20 C40,35 30,45 15,40 C20,25 35,20 50,30 C55,15 65,25 60,40 C45,35 30,50 35,65 C50,60 65,75 60,90 C75,85 80,70 70,55 C85,60 95,50 90,35 C75,40 65,30 70,15 C55,20 50,35 60,50 C55,65 45,55 40,70 C25,65 20,50 30,35 C15,40 5,50 10,65 C25,60 35,70 30,85 C45,80 50,65 40,50 C45,35 55,45 60,30 Z"/>
+            </svg>`
+        ];
+        
+        // Create mythological background
+        function createMythologicalBackground() {
+            // Clear previous elements
+            mythologicalBackground.innerHTML = '';
+            
+            // Add stars
+            for (let i = 0; i < 100; i++) {
+                const size = Math.random() * 3;
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const delay = Math.random() * 5;
+                const duration = Math.random() * 3 + 2;
+                
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${x}%`;
+                star.style.top = `${y}%`;
+                star.style.animationDelay = `${delay}s`;
+                star.style.animationDuration = `${duration}s`;
+                
+                mythologicalBackground.appendChild(star);
+            }
+            
+            // Add mythological symbols
+            for (let i = 0; i < 15; i++) {
+                const symbolIndex = Math.floor(Math.random() * mythSymbols.length);
+                const size = Math.random() * 100 + 60;
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const delay = Math.random() * 5;
+                const duration = Math.random() * 10 + 10;
+                
+                const symbolContainer = document.createElement('div');
+                symbolContainer.style.position = 'absolute';
+                symbolContainer.style.left = `${x}%`;
+                symbolContainer.style.top = `${y}%`;
+                symbolContainer.style.animationDelay = `${delay}s`;
+                symbolContainer.style.animationDuration = `${duration}s`;
+                symbolContainer.innerHTML = mythSymbols[symbolIndex];
+                
+                const symbol = symbolContainer.querySelector('.myth-symbol');
+                symbol.style.width = `${size}px`;
+                symbol.style.height = `${size}px`;
+                
+                mythologicalBackground.appendChild(symbolContainer);
+            }
+            
+            // Add mist elements
+            for (let i = 0; i < 8; i++) {
+                const width = Math.random() * 300 + 200;
+                const height = Math.random() * 300 + 200;
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const opacity = Math.random() * 0.08 + 0.02;
+                const delay = Math.random() * 10;
+                
+                const mist = document.createElement('div');
+                mist.className = 'mist';
+                mist.style.width = `${width}px`;
+                mist.style.height = `${height}px`;
+                mist.style.left = `${x}%`;
+                mist.style.top = `${y}%`;
+                mist.style.opacity = opacity;
+                mist.style.animationDelay = `${delay}s`;
+                
+                mythologicalBackground.appendChild(mist);
+            }
+        }
+        
+        // Create mythological background
+        createMythologicalBackground();
+        
+        // Initialize on window load
+        window.onload = function() {
+            // Load the song
+            loadSong();
+        };
+    
+        function loadSong() {
+            audio.src = song.src;
+            songTitle.textContent = song.title;
+            
+            // Update color theme based on song color
+            document.documentElement.style.setProperty('--theme-color', song.color);
+            
+            audio.load();
+        }
+    
+        function playSong() {
+            coverContainer.classList.add('playing');
+            audio.play();
+            isPlaying = true;
+            playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        }
+    
+        function pauseSong() {
+            coverContainer.classList.remove('playing');
+            audio.pause();
+            isPlaying = false;
+            playBtn.innerHTML = '<i class="fas fa-play"></i>';
+        }
+    
+        function goToNextPage() {
+            // Navigate to the next page
+            window.location.href = nextPageUrl;
+        }
+        
+        // Format time to MM:SS
+        function formatTime(seconds) {
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return `${min}:${sec < 10 ? '0' + sec : sec}`;
+        }
+    
+        playBtn.addEventListener('click', () => {
+            isPlaying ? pauseSong() : playSong();
+        });
+    
+        // Navigate to next page
+        nextBtn.addEventListener('click', goToNextPage);
+        nextBtn2.addEventListener('click', goToNextPage);
+    
+        // Update progress bar
+        audio.addEventListener('timeupdate', () => {
+            const progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = `${progress}%`;
+            
+            // Update current time
+            currentTimeEl.textContent = formatTime(audio.currentTime);
+        });
+        
+        // Set duration when metadata is loaded
+        audio.addEventListener('loadedmetadata', () => {
+            durationEl.textContent = formatTime(audio.duration);
+        });
+    
+        // Click on progress bar
+        progressContainer.addEventListener('click', (event) => {
+            const width = progressContainer.clientWidth;
+            const clickX = event.offsetX;
+            const duration = audio.duration;
+            audio.currentTime = (clickX / width) * duration;
+        });
+        
+        // Volume control
+        volumeSlider.addEventListener('click', (event) => {
+            const width = volumeSlider.clientWidth;
+            const clickX = event.offsetX;
+            const volume = clickX / width;
+            
+            // Set volume and update UI
+            audio.volume = volume;
+            volumeProgress.style.width = `${volume * 100}%`;
+        });
+    
+        // Set initial volume
+        audio.volume = 0.7;
+        
+        // Keyboard controls
+        document.addEventListener('keydown', (event) => {
+            switch(event.code) {
+                case 'Space':
+                    event.preventDefault();
+                    isPlaying ? pauseSong() : playSong();
+                    break;
+                case 'ArrowRight':
+                    goToNextPage();
+                    break;
+                case 'ArrowUp':
+                    audio.volume = Math.min(1, audio.volume + 0.1);
+                    volumeProgress.style.width = `${audio.volume * 100}%`;
+                    break;
+                case 'ArrowDown':
+                    audio.volume = Math.max(0, audio.volume - 0.1);
+                    volumeProgress.style.width = `${audio.volume * 100}%`;
+                    break;
+            }
+        });
+        
+        // When song ends, navigate to next page
+        audio.addEventListener('ended', () => {
+            goToNextPage();
+        });
+        
+        // Add resize listener to recreate background
+        window.addEventListener('resize', createMythologicalBackground);
+    </script>
+
+</body>
+</html>
