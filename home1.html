@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mantra - Mythological Theme</title>
+  <title>Mantra - Unlocking the Mystical Power of Sound</title>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+
   <style>
     * {
       margin: 0;
@@ -195,17 +197,36 @@
       line-height: 1.6;
     }
 
-    /* Mood Cards Container */
+    /* Mood Cards Container - MODIFIED FOR SINGLE ROW */
     .container {
       display: flex;
       justify-content: center;
-      flex-wrap: wrap;
-      gap: 40px;
-      max-width: 1400px;
+      flex-wrap: nowrap; /* Changed from wrap to nowrap */
+      gap: 20px; /* Reduced gap from 40px */
+      width: 100%; /* Use full width */
       margin: 0 auto;
+      overflow-x: auto; /* Add horizontal scroll for smaller screens */
+      padding: 20px 0; /* Add some padding */
+      scrollbar-width: thin;
+      scrollbar-color: var(--gold) rgba(0,0,0,0.2);
+    }
+    
+    /* Custom scrollbar for the container */
+    .container::-webkit-scrollbar {
+      height: 8px;
+    }
+    
+    .container::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.2);
+      border-radius: 10px;
+    }
+    
+    .container::-webkit-scrollbar-thumb {
+      background-color: var(--gold);
+      border-radius: 10px;
     }
 
-    /* Card styling */
+    /* Card styling - ADJUSTED SIZES */
     .flip-container {
       perspective: 1000px;
       margin-bottom: 20px;
@@ -225,8 +246,9 @@
     }
     
     .box {
-      width: 250px;
-      height: 320px;
+      width: 220px; /* Smaller width to fit in row */
+      height: 300px; /* Smaller height */
+      min-width: 220px; /* Prevent shrinking too much */
       border-radius: 15px;
       position: relative;
       transform-style: preserve-3d;
@@ -324,13 +346,13 @@
     
     .back h3 {
       font-family: 'Cinzel', serif;
-      font-size: 28px;
+      font-size: 24px; /* Slightly smaller font */
       margin-bottom: 15px;
       letter-spacing: 1px;
     }
     
     .back p {
-      font-size: 18px;
+      font-size: 16px; /* Slightly smaller font */
       margin-bottom: 20px;
       line-height: 1.4;
     }
@@ -342,7 +364,7 @@
       padding: 8px 20px;
       border-radius: 30px;
       font-family: 'Cinzel', serif;
-      font-size: 16px;
+      font-size: 14px; /* Slightly smaller font */
       cursor: pointer;
       transition: all 0.3s ease;
     }
@@ -427,14 +449,10 @@
     }
 
     /* Responsive */
-    @media (max-width: 1024px) {
+    @media (max-width: 1200px) {
       .container {
-        gap: 25px;
-      }
-      
-      .box {
-        width: 220px;
-        height: 300px;
+        justify-content: flex-start; /* Align from left on smaller screens */
+        padding: 20px;
       }
     }
     
@@ -490,16 +508,33 @@
         margin: 0 8px;
         font-size: 14px;
       }
+      
+      /* Ensure cards have appropriate size on mobile */
+      .box {
+        width: 200px;
+        height: 280px;
+        min-width: 200px;
+      }
     }
     
     @media (max-width: 600px) {
       .container {
-        gap: 15px;
+        padding: 10px;
       }
       
+      /* Make cards more visible on very small screens */
       .box {
-        width: 280px;
-        height: 350px;
+        width: 180px;
+        height: 260px;
+        min-width: 180px;
+      }
+      
+      .back h3 {
+        font-size: 20px;
+      }
+      
+      .back p {
+        font-size: 14px;
       }
     }
   </style>
@@ -518,7 +553,7 @@
       <i class="fas fa-bars"></i>
     </button>
     <div class="nav-links" id="navLinks">
-      <a href="#"><i class="fas fa-home"></i> Home</a>
+      <a href="calendar.html"><i class="fa-solid fa-calendar-days"></i> Calendar</a>
       <a href="om.html"><i class="fa-solid fa-om"></i>Mantra</a>
       <a href="proof.html"><i class="fas fa-book"></i> Theory(M)</a>
       <a href="proof.html"><i class="fas fa-scroll"></i> Theory(S)</a>
@@ -614,8 +649,8 @@
     <div class="footer-content">
       <div class="copyright">© 2025 Mantra | Designed by MANTRA & TEAM</div>
       <div class="footer-links">
-        <a href="#">About</a>
-        <a href="#">Contact</a>
+        <a href="about.html">About</a>
+        <a href="https://qr.codes/hajscS">Suggestions</a>
         <a href="#">Privacy</a>
       </div>
       <div class="social-icons">
